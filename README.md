@@ -2,7 +2,6 @@
 
 ### What is it?
 easyTH is an add-on for FFXI's third-party loader and hook Ashita (https://www.ashitaxi.com/).
-
 The purpose of this add-on is to offer easy tracking for Treasure Hunter procs.
 <br></br>
 
@@ -35,3 +34,16 @@ No compatibility issues found so far.
 ```/easyth anyjob``` Toggles the tracking between "only on THF main job" and "any job".
 
 <br></br>
+
+### Credits
+easyTH relies on the following scripts developed the Ashita Development Team
+<ul>
+  <li>bitreader.lua</li>
+  <li>parser.lua</li>
+</ul>
+
+Ashita Development Team contacts:
+<ul>
+<li><a href="https://www.ashitaxi.com" target="_blank">Website</a></li>
+<li><a href="https://discord.gg/Ashita" target="_blank">Discord</a></li>
+</ul>
