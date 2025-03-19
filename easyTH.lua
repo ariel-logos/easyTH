@@ -71,7 +71,7 @@ ashita.events.register("d3d_present", "present_cb", function()
   	end
 end)
 
-ashita.events.register('command', 'thtracker_command', function(e)
+ashita.events.register('command', 'easyth_command', function(e)
 	local args = e.command:args();
 	
 	if not args[1]:any('/easyth') then
@@ -149,8 +149,6 @@ function GetPartyIDs()
 		local partyJob = AshitaCore:GetMemoryManager():GetParty():GetMemberMainJob(i)
 		if partyID > 0 and partyJob == 6 then
 			table.insert(partyIDs, partyID)
-		else
-			break
 		end
 	end
 end
