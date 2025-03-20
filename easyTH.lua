@@ -74,6 +74,8 @@ end)
 ashita.events.register('command', 'easyth_command', function(e)
 	local args = e.command:args();
 	
+	if #args == 0 then return end
+	
 	if not args[1]:any('/easyth') then
 		return false;
 	end
