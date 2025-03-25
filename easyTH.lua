@@ -1,7 +1,7 @@
 addon.author = 'Arielfy';
 addon.name = 'EasyTH';
-addon.version = '0.2';
-addon.desc = 'Tracks Treasure Hunter procs.'
+addon.version = '0.4';
+addon.desc = 'Tracks Treasure Hunter procs'
 addon.link = 'https://github.com/ariel-logos/easyTH'
 addon.commands = {'/easyth anyjob'}
 
@@ -23,7 +23,9 @@ local currentPacket
 local currentEnemy = 0
 local playerJob = -1
 local partyIDs = {}
+local enemies = {}
 local anyJob = false
+local enemyCount = 0
 
 ashita.events.register("load", "load_cb", function ()
 end);
@@ -38,8 +40,11 @@ ashita.events.register("d3d_present", "present_cb", function()
 	local player = AshitaCore:GetMemoryManager():GetPlayer();
 	local loggedin = player:GetLoginStatus()
 	if loggedin ~= 2 then
+		currentEnemy = 0
 		enemyName = ""
 		currentTH = 0
+		enemies = {}
+		enemyCount = 0
 	end
 
 	playerJob = AshitaCore:GetMemoryManager():GetPlayer():GetMainJob();
@@ -54,7 +59,7 @@ ashita.events.register("d3d_present", "present_cb", function()
 		--ImGuiWindowFlags_NoBackground, 
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 	
-	   if (enemyName ~= '' and imgui.Begin('Treasure Hunter Tracker', true, windowFlags)) then
+	   if (enemyCount > 0 and imgui.Begin('Treasure Hunter Tracker', true, windowFlags)) then
 			
     		if enemyName == "" then
     			imgui.Text('EasyTH')
@@ -65,7 +70,7 @@ ashita.events.register("d3d_present", "present_cb", function()
 				imgui.Separator();
 				imgui.Text('TH Lvl: '..currentTH)
 			end
-			
+
 			imgui.End();
   		end
   	end
@@ -100,10 +105,16 @@ ashita.events.register('packet_in', 'packet_in_cb', function(e)
 			
 			local message_id = struct.unpack('H', e.data, 0x19)%2^15
 			local target_id = struct.unpack('I', e.data, 0x09)
-			if (message_id == 6 or message_id == 20) and target_id == currentEnemy then
-				currentEnemy = 0
-				currentTH = 0
-				enemyName = ''			
+			if (message_id == 6 or message_id == 20) then
+				if target_id == currentEnemy then
+					currentEnemy = 0
+					currentTH = 0
+					enemyName = ''			
+				end
+				if enemies[tostring(target_id)] then
+					enemies[tostring(target_id)] = nil
+					enemyCount = enemyCount - 1
+				end
 			end
 		end
 		if (e.id == 0x0028) then
@@ -129,14 +140,29 @@ ashita.events.register('packet_in', 'packet_in_cb', function(e)
 			
 			if currentEnemy ~= currentPacket.target[1].m_uID then
 				GetPartyIDs()
-				currentEnemy = currentPacket.target[1].m_uID
-				enemyName = currentPacket.target[1].target_name
-				currentTH = 0
+				if partyIDs[1] == m_uID then currentEnemy = currentPacket.target[1].m_uID end
+				enemyStr = tostring(currentPacket.target[1].m_uID)
+				if enemies[enemyStr] then
+					if partyIDs[1] == m_uID then
+						enemyName = enemies[enemyStr][1]
+						currentTH = enemies[enemyStr][2]
+					end
+				else
+					if partyIDs[1] == m_uID then
+						enemyName = currentPacket.target[1].target_name
+						currentTH = 0
+					end
+					enemies[enemyStr] = {currentPacket.target[1].target_name, currentTH}
+					enemyCount = enemyCount + 1
+				end	
 			end
 			
 			local target = currentPacket.target[1]		
 			target.result:each(function (v, k)
-				if v.proc_kind == 7 and v.proc_message == 603 then currentTH = v.proc_value end
+				if v.proc_kind == 7 and v.proc_message == 603 then
+					if partyIDs[1] == m_uID then currentTH = v.proc_value end
+					if enemies[tostring(currentPacket.target[1].m_uID)] then enemies[tostring(currentPacket.target[1].m_uID)][2] = v.proc_value end
+				end
 			end)
 		end
 	end
@@ -146,13 +172,20 @@ end);
 function GetPartyIDs()
 
 	partyIDs = {}
-	for i = 0, 15 do
-		local partyID = AshitaCore:GetMemoryManager():GetParty():GetMemberServerId(i)
-		local partyJob = AshitaCore:GetMemoryManager():GetParty():GetMemberMainJob(i)
+	local thfFound = false
+	local partyID = AshitaCore:GetMemoryManager():GetParty():GetMemberServerId(0)
+	local partyJob = AshitaCore:GetMemoryManager():GetParty():GetMemberMainJob(0)
+	table.insert(partyIDs, partyID)
+	if partyJob == 6 then thfFound = true end
+	for i = 1, 15 do
+		partyID = AshitaCore:GetMemoryManager():GetParty():GetMemberServerId(i)
+		partyJob = AshitaCore:GetMemoryManager():GetParty():GetMemberMainJob(i)
 		if partyID > 0 and partyJob == 6 then
 			table.insert(partyIDs, partyID)
+			thfFound = true
 		end
 	end
+	if not thfFound then partyIDs = {} end
 end
 
 function UnpackData(e_data_raw, e_size, offset, length)
