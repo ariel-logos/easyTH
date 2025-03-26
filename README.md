@@ -34,6 +34,8 @@ No compatibility issues found so far.
 
 ```/easyth anyjob``` Toggles the tracking between "only on THF main job" and "any job".
 
+```/easyth reset``` Resets the TH tracking. Useful if the client misses the mob death packet.
+
 <br></br>
 
 ### Credits
