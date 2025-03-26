@@ -18,6 +18,7 @@ By default, the window remains hidden and only appears when there is a chance to
 Many Treasure Hunter procs trackers are text-based, meaning they parse the game chat looking for key words to display the necessary information.
 easyTH is packet-based, efficiently filtering packets to only process those that contain the proc information.
 The advantage of a packet-based approach is solid reliability when collecting the information and displaying them, which is often an issue on text-based trackers.
+Additionally, this addon tracks TH procs on all engaged mobs until they are defeated, ensuring that switching targets does not reset the stack count.
 
 ### Installation
 Go over the <a href="https://github.com/ariel-logos/easyTH/releases" target="_blank">Releases</a> page, download the latest version and unpack it in the add-on folder in your Ashita installation folder. You should now have among the other add-on folders the "easyTH" one!
