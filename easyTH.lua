@@ -92,6 +92,17 @@ ashita.events.register('command', 'easyth_command', function(e)
 		if anyJob then print('[EasyTH] TH is now tracked on any Job.')
 		else print('[EasyTH] TH is now tracked on THF.') end
 	end
+	
+	if #args == 2 and args[2]:any('reset') then
+		enemyName = ""
+		currentTH = 0
+		defeatCD = 0
+		currentEnemy = 0
+		partyIDs = {}
+		enemies = {}
+		enemyCount = 0
+		print('[EasyTH] Tracking has been reset.')
+	end
 end);
 
 
